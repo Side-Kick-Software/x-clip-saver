@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getTweet } from "react-tweet/api";
+import { getRequestContext } from "@cloudflare/next-on-pages";
 
 export const runtime = "edge";
 
@@ -14,6 +15,8 @@ interface MediaItem {
 }
 
 export async function POST(request: NextRequest) {
+  const myKv = getRequestContext().env.MY_KV;
+
   try {
     const body = await request.json();
     const { url } = schema.parse(body);
@@ -65,6 +68,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const countKey = "api_call_count";
+    const currentCount = await myKv.get(countKey);
+    const newCount = currentCount ? parseInt(currentCount) + 1 : 1;
+    await myKv.put(countKey, newCount.toString());
+
     return NextResponse.json({
       tweetId: tweet.id_str,
       text: tweet.text,
@@ -77,6 +85,7 @@ export async function POST(request: NextRequest) {
       mediaItems: mediaItems,
     });
   } catch (error) {
+    console.log(error);
     return NextResponse.json({ error: "Invalid url" }, { status: 400 });
   }
 }

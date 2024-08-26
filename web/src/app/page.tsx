@@ -30,6 +30,21 @@ interface TweetData {
   mediaItems: MediaItem[];
 }
 
+function isTweetData(data: any): data is TweetData {
+  return (
+    typeof data === "object" &&
+    "tweetId" in data &&
+    "text" in data &&
+    "author" in data &&
+    "createdAt" in data &&
+    "mediaItems" in data &&
+    Array.isArray(data.mediaItems) &&
+    data.mediaItems.every(
+      (item: any) => typeof item === "object" && "type" in item && "url" in item
+    )
+  );
+}
+
 export default function Component() {
   const [tweetUrl, setTweetUrl] = useState("");
   const [tweetData, setTweetData] = useState<TweetData | null>(null);
@@ -70,7 +85,11 @@ export default function Component() {
       }
 
       const data = await response.json();
-      setTweetData(data);
+      if (isTweetData(data)) {
+        setTweetData(data);
+      } else {
+        throw new Error("Invalid tweet data received");
+      }
     } catch (err) {
       setError("Failed to fetch tweet data. Please try again.");
     } finally {

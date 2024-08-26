@@ -2,3 +2,7 @@ name = "x-clip-saver"
 compatibility_date = "2024-07-29"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
+
+[[kv_namespaces]]
+binding = "MY_KV"
+id = "4b44bcbf1ea144c3a18cf37a943cf2d5"
